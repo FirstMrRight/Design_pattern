@@ -1,6 +1,5 @@
 package com.company.chain;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,15 +14,16 @@ public class Main {
         Msg msg = new Msg();
         msg.setMsg("大家好:), <script>,欢迎访问 49.232.21.180,大家都是996");
 
+        //条件筛选,链式编程
+        //链式编程可以使得代码可读性高，链式编程的原理就是返回一个this对象，就是返回本身，达到链式效果
+        FilterChain fc = new FilterChain();
+        fc.add(new HTMLFilter()).add(new SensitiveFilter());
 
-        //条件筛选
-        List<Filter> filterList = new ArrayList<>();
-        filterList.add(new HTMLFilter());
-        filterList.add(new SensitiveFilter());
-        filterList.forEach(it -> {
-            it.doFilter(msg);
-        });
+        FilterChain fc2 = new FilterChain();
+        fc2.add(new FaceFilter()).add(new UrlFilter());
 
+        fc.add(fc2);
+        fc.doFilter(msg);
         System.out.println(msg);
     }
 
@@ -62,7 +62,6 @@ interface Filter {
 }
 
 class HTMLFilter implements Filter {
-
     @Override
     public void doFilter(Msg m) {
         String r = m.getMsg();
@@ -79,5 +78,49 @@ class SensitiveFilter implements Filter {
         String r = m.getMsg();
         r = r.replaceAll("996", "955");
         m.setMsg(r);
+    }
+
+}
+
+//=========================一下类作为链条2=========================
+
+class FaceFilter implements Filter{
+
+    @Override
+    public void doFilter(Msg m) {
+        String r = m.getMsg();
+        r = r.replace(":)" ,"(::)");
+        m.setMsg(r);
+    }
+}
+
+
+class UrlFilter implements Filter{
+
+    @Override
+    public void doFilter(Msg m) {
+        String r = m.getMsg();
+        r = r.replace("49.232.21.180","http://49.232.21.180.com");
+        m.setMsg(r);
+    }
+}
+
+
+/**
+ * 消息处理交给链条,使处理逻辑从头走到尾
+ */
+class FilterChain implements Filter{
+    List<Filter> filters = new ArrayList<>();
+
+    public FilterChain add(Filter filter) {
+        filters.add(filter);
+        return this;
+    }
+
+    @Override
+    public void doFilter(Msg m) {
+        for (Filter f : filters) {
+            f.doFilter(m);
+        }
     }
 }
