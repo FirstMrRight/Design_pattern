@@ -1,7 +1,5 @@
 package com.company.chain.middleware;
 
-import com.company.chain.middleware.Middleware;
-
 /**
  * @author Liutx
  * @date 2021/1/17 17:20
